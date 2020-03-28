@@ -5,19 +5,19 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { MonoText } from '../components/StyledText';
 
-export default function HomeScreen({navigation}) {
+export default function ActivitiesScreen({navigation}) {
     return (
     <View style={styles.container}>
-      <Text>Home Screen</Text>
+      <Text>Activities Screen</Text>
       <Button
-        title="Go to Activities"
-        onPress={() => navigation.navigate('Activities')}
+        title="Go to Food"
+        onPress={() => navigation.navigate('Home')}
       />
     </View>
   );
 }
 
-HomeScreen.navigationOptions = {
+ActivitiesScreen.navigationOptions = {
 
 };
 
