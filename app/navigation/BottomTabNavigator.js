@@ -6,7 +6,7 @@ import TabBarIcon from "../components/TabBarIcon";
 import HomeScreen from "../screens/homeScreen";
 import TopPicksScreen from "../screens/TopPicksScreen";
 import MessagesScreen from "../screens/MessagesScreen";
-import ProfileScreen from "../screens/ProfileScreen";
+import ProfileScreen from "../screens/profileScreen";
 
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = "Home";
