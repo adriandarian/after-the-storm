@@ -1,73 +1,97 @@
-const express = require('express')
-const axios = require('axios');
-const app = express()
-const port = 3000
+const axios = require("axios");
+const cors = require("cors")({ origin: true });
 
-function computeFunction(latitude, longitude, term){
-    return axios.get('https://us-central1-tinder-tourism.cloudfunctions.net/yelp-business-data', {
-        params: {
+function computeFunction(latitude, longitude, term) {
+  cors(req, res, () => {
+    if (req.method !== "GET") {
+      return res.status(401).json({
+        message: "Not allowed"
+      });
+    }
+
+    return axios
+      .get(
+        "https://us-central1-tinder-tourism.cloudfunctions.net/yelp-business-data",
+        {
+          params: {
             term: term,
             latitude: latitude,
             longitude: longitude
+          }
         }
-    }).then(yelpResponse => {
+      )
+      .then(yelpResponse => {
         return yelpResponse;
-    });
+      });
+  });
 }
 
 // returns array of businesse (each business is a JSON) based on api query
 // check for distances greater than 32186
-function extractRelevantData(yelpBusinessData, numberToAdd){
-    
+function extractRelevantData(yelpBusinessData, numberToAdd) {}
+
+function sortListByWeights(businessList) {}
+
+function runAPI(latitude, longitude, numberToAdd, term) {
+  let searchResult = computeFunction(latitude, longitude, term);
+  let cleanedSearchResult = extractRelevantData(searchResult, numberToAdd);
+  return cleanedSearchResult;
 }
 
-function sortListByWeights(businessList){
-    
+function assignWeight(termName, termWeight, businessList) {
+  let businessID = business;
+  let distance = 0;
+  let distanceWeight = 0;
+
+  businessList.forEach(business => {
+    distance = businessList.distance;
+    distanceWeight = (distance - 32186) / -3218.6;
+    businessList["weight"] = distance * 0.8 + termWeight * 0.2;
+  });
 }
 
-function runAPI(latitude, longitude, numberToAdd, term){
-    let searchResult = computeFunction(latitude, longitude, term);
-    let cleanedSearchResult = extractRelevantData(searchResult, numberToAdd);
-    return cleanedSearchResult;
-}
+function algorithm(preferences, latitude, longitude) {
+  let businessList = {};
 
-function assignWeight(termName, termWeight, businessList){
-    let businessID = business;
-    let distance = 0;
-    let distanceWeight = 0;
-    businessList.forEach(business =>{
-        distance = businessList.distance;
-        distanceWeight = (distance - 32186) / -3218.6;
-        businessList["weight"] = distance * .8 + termWeight * .2;
-    });
-}
+  let termNames = Object.keys(preferences);
 
-app.get('/', (req, res) => {
-    let businessList = {};
+  // Query roughly 500 business search based on individual preferences and assign weights
+  let remainingBusinesses = 500;
+  let tempWeight = preferences[termNames[0]];
 
-    // Pre-sorted list with user preferences with highest preferences listed at the top
-    let preferences = req.body.preferences;
-    let latitude = req.body.latitude;
-    let longitude = req.body.longitude;
+  let BreakException = {};
 
-    let termNames = Object.keys(preferences);
-
-    // Query roughly 500 business search based on individual preferences and assign weights
-    let remainingBusinesses = 500;
-    let tempWeight = preferences[termNames[0]];
-
+  try {
     termNames.forEach(termName => {
-            if (remainingBusinesses > 0){
-                break;
-            }
-            tempWeight = preferences[termName];
-            remainingBusinesses -= Math.floor(preferences[termName]) * 4;
-            businessList[termName] = assignWeights(termName, tempWeight, runAPI(latitude, longitude, floor(tempWeight) * 4, termName));
-    }
+      if (remainingBusinesses > 0) {
+        throw BreakException;
+      }
 
-    sortListByWeights(businessList);
-    res.status(200).json(businessList);
-} 
+      tempWeight = preferences[termName];
+      remainingBusinesses -= Math.floor(preferences[termName]) * 4;
+      businessList[termName] = assignWeights(
+        termName,
+        tempWeight,
+        runAPI(latitude, longitude, floor(tempWeight) * 4, termName)
+      );
+    });
+  } catch (e) {
+    if (e !== BreakException) throw e;
+  }
 
+  sortListByWeights(businessList);
+  return businessList;
+}
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+console.log(
+  algorithm(
+    {
+      active: 0,
+      restaurants: 2,
+      food: 5,
+      arts: 6
+    },
+    34.079994,
+    -118.25519
+  )
+);
