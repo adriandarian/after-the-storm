@@ -7,53 +7,50 @@ import shuffleArray from "../utils/shuffleArray";
 import { Card } from "../components/Card";
 import { HomeScreenPics } from "../constants/Pics";
 
-class HomeScreen extends React.Component {
-  _isMounted = false;
+let businessData;
 
+(function businesses() {
+  return axios
+    .get(
+      "https://us-central1-tinder-tourism.cloudfunctions.net/yelp-business-data",
+      {
+        params: {
+          term: ["active", "restaurants", "food", "arts"][
+            Math.floor(Math.random() * Math.floor(4))
+          ],
+          latitude: 34.079994,
+          longitude: -118.25519
+        }
+      }
+    )
+    .then(response => {
+      let cards = [];
+      response.data.businesses.forEach(e => {
+        cards.push({
+          pic: { uri: e["image_url"] },
+          title: e["name"],
+          caption: e["alias"]
+        });
+      });
+
+      businessData = shuffleArray(cards);
+    });
+})();
+
+class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       swipedAllCards: false,
       swipeDirection: "",
       cardIndex: 0,
-      initialBusinesses: []
     };
-  }
-
-  componentDidMount() {
-    axios
-      .get(
-        "https://us-central1-tinder-tourism.cloudfunctions.net/yelp-business-data",
-        {
-          params: {
-            term: ["active", "restaurants", "food", "arts"][
-              Math.floor(Math.random() * Math.floor(4))
-            ],
-            latitude: 34.079994,
-            longitude: -118.25519
-          }
-        }
-      )
-      .then(response => {
-        let cards = [];
-        response.data.businesses.forEach(e => {
-          cards.push({
-            pic: { uri: e["image_url"] },
-            title: e["name"],
-            caption: e["description"]
-          });
-        });
-
-        this.setState({
-          initialBusinesses: shuffleArray(cards)
-        });
-      });
-
-    console.log("IB: ", this.state.initialBusinesses);
   }
 
   onSwiped = type => {
     console.log(`on swiped ${type}`);
+    console.log("HSP: ", HomeScreenPics);
+    console.log("BD: ", businessData)
   };
 
   onSwipedAllCards = () => {
@@ -68,7 +65,7 @@ class HomeScreen extends React.Component {
 
   render() {
     const { businesses } = this.state;
-    console.log(businesses)
+    console.log("3: ", businessData)
     return (
       <SafeAreaView style={styles.container}>
         <Swiper
@@ -81,7 +78,7 @@ class HomeScreen extends React.Component {
           onSwipedTop={() => this.onSwiped("top")}
           onSwipedBottom={() => this.onSwiped("bottom")}
           onTapCard={this.swipeLeft}
-          cards={HomeScreenPics}
+          cards={businessData}
           cardIndex={this.state.cardIndex}
           cardVerticalMargin={80}
           cardHorizontalMargin={0}
