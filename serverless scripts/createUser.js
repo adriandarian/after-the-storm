@@ -7,16 +7,20 @@ const MongoClient = require("mongodb").MongoClient;
  * @param {!express:Response} res HTTP response context.
  */
 exports.createUser = (req, res) => {
-  MongoClient.connect(process.env.MONGO_URL_TEST, (err, client) => {
-    client
-      .db("test")
-      .collection("user")
-      .insertOne(req.body, (err, result) => {
-        if (err !== null) {
-          res.status(400).send(err);
-        }
+  MongoClient.connect(
+    process.env.MONGO_URL_TEST,
+    { useUnifiedTopology: true },
+    (err, client) => {
+      client
+        .db("test")
+        .collection("user")
+        .insertOne(req.body, (err, result) => {
+          if (err !== null) {
+            res.status(400).send(err);
+          }
 
-        res.status(200).send(result);
-      });
-  });
+          res.status(200).send(result);
+        });
+    }
+  );
 };
