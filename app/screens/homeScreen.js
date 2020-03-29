@@ -1,31 +1,31 @@
-import * as React from 'react';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View, Button } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import * as WebBrowser from 'expo-web-browser';
+import React from "react";
+import { SafeAreaView, StyleSheet } from "react-native";
+import Swiper from "react-native-deck-swiper";
+import { Card } from "../components/Card";
+import { HomeScreenPics } from "../constants/Pics";
 
-import { MonoText } from '../components/StyledText';
-
-export default function HomeScreen({navigation}) {
+class HomeScreen extends React.Component {
+  render() {
     return (
-    <View style={styles.container}>
-      <Text>Home Screen</Text>
-      <Button
-        title="Go to Activities"
-        onPress={() => navigation.navigate('Activities')}
-      />
-    </View>
-  );
+      <SafeAreaView style={styles.container}>
+        <Swiper
+          cards={HomeScreenPics}
+          renderCard={Card}
+          infinite
+          backgroundColor="white"
+          cardHorizontalMargin={0}
+          stackSize={2}
+        />
+      </SafeAreaView>
+    );
+  }
 }
-
-HomeScreen.navigationOptions = {
-
-};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
+    backgroundColor: "transparent"
+  }
 });
+
+export default HomeScreen;

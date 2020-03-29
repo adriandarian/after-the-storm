@@ -1,17 +1,19 @@
 {
+  "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
     "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
     "eject": "expo eject",
-    "test": "jest --watchAll"
+    "ios": "expo start --ios",
+    "start": "expo start",
+    "test": "jest --watchAll",
+    "web": "expo start --web"
   },
   "jest": {
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo/samples": "^3.0.3",
     "@expo/vector-icons": "~10.0.0",
     "@react-native-community/masked-view": "0.1.5",
     "@react-native-mapbox-gl/maps": "^8.0.0-rc1",
@@ -27,15 +29,18 @@
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-36.0.0.tar.gz",
+    "react-native-deck-swiper": "^1.6.7",
+    "react-native-elements": "^1.2.7",
     "react-native-gesture-handler": "~1.5.0",
     "react-native-safe-area-context": "0.6.0",
     "react-native-screens": "2.0.0-alpha.12",
-    "react-native-web": "~0.11.7"
+    "react-native-view-overflow": "^0.0.5",
+    "react-native-web": "~0.11.7",
+    "react-navigation": "^4.3.5"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "babel-preset-expo": "~8.0.0",
     "jest-expo": "~36.0.1"
-  },
-  "private": true
+  }
 }
