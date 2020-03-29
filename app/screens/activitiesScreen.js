@@ -1,31 +1,140 @@
-import * as React from 'react';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View, Button } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import * as WebBrowser from 'expo-web-browser';
+import React from "react";
+import { SafeAreaView, StyleSheet } from "react-native";
+import Swiper from "react-native-deck-swiper";
+import { Card } from "../components/Card";
+import { ActivityScreenPics } from "../constants/Pics";
 
-import { MonoText } from '../components/StyledText';
+class ActivitiesScreen extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      swipedAllCards: false,
+      swipeDirection: "",
+      cardIndex: 0
+    };
+  }
 
-export default function ActivitiesScreen({navigation}) {
+  onSwiped = type => {
+    console.log(`on swiped ${type}`);
+  };
+
+  onSwipedAllCards = () => {
+    this.setState({
+      swipedAllCards: true
+    });
+  };
+
+  swipeLeft = () => {
+    this.swiper.swipeLeft();
+  };
+
+  render() {
     return (
-    <View style={styles.container}>
-      <Text>Activities Screen</Text>
-      <Button
-        title="Go to Food"
-        onPress={() => navigation.navigate('Home')}
-      />
-    </View>
-  );
+      <SafeAreaView style={styles.container}>
+        <Swiper
+          ref={swiper => {
+            this.swiper = swiper;
+          }}
+          onSwiped={() => this.onSwiped("general")}
+          onSwipedLeft={() => this.onSwiped("left")}
+          onSwipedRight={() => this.onSwiped("right")}
+          onSwipedTop={() => this.onSwiped("top")}
+          onSwipedBottom={() => this.onSwiped("bottom")}
+          onTapCard={this.swipeLeft}
+          cards={ActivityScreenPics}
+          cardIndex={this.state.cardIndex}
+          cardVerticalMargin={80}
+          cardHorizontalMargin={0}
+          renderCard={Card}
+          onSwipedAll={this.onSwipedAllCards}
+          stackSize={3}
+          stackSeparation={15}
+          overlayLabels={{
+            bottom: {
+              title: "BLEAH",
+              style: {
+                label: {
+                  backgroundColor: "black",
+                  borderColor: "black",
+                  color: "white",
+                  borderWidth: 1
+                },
+                wrapper: {
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }
+              }
+            },
+            left: {
+              title: "NOPE",
+              style: {
+                label: {
+                  backgroundColor: "black",
+                  borderColor: "black",
+                  color: "white",
+                  borderWidth: 1
+                },
+                wrapper: {
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  justifyContent: "flex-start",
+                  marginTop: 30,
+                  marginLeft: -30
+                }
+              }
+            },
+            right: {
+              title: "LIKE",
+              style: {
+                label: {
+                  backgroundColor: "black",
+                  borderColor: "black",
+                  color: "white",
+                  borderWidth: 1
+                },
+                wrapper: {
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  justifyContent: "flex-start",
+                  marginTop: 30,
+                  marginLeft: 30
+                }
+              }
+            },
+            top: {
+              title: "SUPER LIKE",
+              style: {
+                label: {
+                  backgroundColor: "black",
+                  borderColor: "black",
+                  color: "white",
+                  borderWidth: 1
+                },
+                wrapper: {
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }
+              }
+            }
+          }}
+          backgroundColor="white"
+          animateOverlayLabelsOpacity
+          animateCardOpacity
+          swipeBackCard
+          infinite
+        />
+      </SafeAreaView>
+    );
+  }
 }
-
-ActivitiesScreen.navigationOptions = {
-
-};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
+    backgroundColor: "transparent"
+  }
 });
+
+export default ActivitiesScreen;

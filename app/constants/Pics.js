@@ -2,7 +2,7 @@ import shuffleArray from "../utils/shuffleArray";
 
 export const HomeScreenPics = shuffleArray([
   {
-    pic: require("../assets/images/women/women1.jpg"),
+    pic: "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png",
     title: "Amelia, 27",
     caption: "16 miles away"
   },
@@ -103,7 +103,7 @@ export const HomeScreenPics = shuffleArray([
   }
 ]);
 
-export const TopPicksScreenPics = shuffleArray([
+export const ActivityScreenPics = shuffleArray([
   {
     pic: require("../assets/images/women/women11.jpg"),
     title: "Annie, 40",
