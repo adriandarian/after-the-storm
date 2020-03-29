@@ -76,9 +76,9 @@ function assignWeights(termName, termWeight, data) {
 }
 
 exports.algorithm = async (req, res) => {
-    let preferences = req.body.preferences;
-    let latitude = req.body.latitude;
-    let longitude = req.body.longitude;
+  let preferences = req.body.preferences;
+  let latitude = req.body.latitude;
+  let longitude = req.body.longitude;
   let businesses = {
       business: []
     },
@@ -109,5 +109,13 @@ exports.algorithm = async (req, res) => {
   }, Promise.resolve([]));
 
   sortListByWeights(businesses);
-  res.status(200).send(businesses);
-}
+
+  let result = {
+      suggestions: []
+  };
+  businesses.business.forEach((e, index) => {
+    result.suggestions.push(businesses.business[index].data)
+  })
+  
+  res.status(200).json(result);
+};
