@@ -1,97 +1,113 @@
 const axios = require("axios");
-const cors = require("cors")({ origin: true });
 
-function computeFunction(latitude, longitude, term) {
-  cors(req, res, () => {
-    if (req.method !== "GET") {
-      return res.status(401).json({
-        message: "Not allowed"
-      });
+async function computeFunction(term, latitude, longitude) {
+  return await axios.get(
+    "https://us-central1-tinder-tourism.cloudfunctions.net/yelp-business-data",
+    {
+      params: {
+        term: term,
+        latitude: latitude,
+        longitude: longitude
+      }
     }
-
-    return axios
-      .get(
-        "https://us-central1-tinder-tourism.cloudfunctions.net/yelp-business-data",
-        {
-          params: {
-            term: term,
-            latitude: latitude,
-            longitude: longitude
-          }
-        }
-      )
-      .then(yelpResponse => {
-        return yelpResponse;
-      });
-  });
+  );
 }
 
 // returns array of businesse (each business is a JSON) based on api query
 // check for distances greater than 32186
-function extractRelevantData(yelpBusinessData, numberToAdd) {}
+function extractRelevantData(data, limit) {
+  data.data.businesses.forEach((business, index) => {
+    if (business["is_closed"] === true) {
+      data.data.businesses.splice(index, 1);
+    }
 
-function sortListByWeights(businessList) {}
+    data.data.businesses[index] = Object.keys(business)
+      .filter(key =>
+        [
+          "id",
+          "name",
+          "image_url",
+          "url",
+          "review_count",
+          "categories",
+          "rating",
+          "coordinates",
+          "price",
+          "distance"
+        ].includes(key)
+      )
+      .reduce((obj, key) => {
+        obj[key] = business[key];
+        return obj;
+      }, {});
+  });
 
-function runAPI(latitude, longitude, numberToAdd, term) {
-  let searchResult = computeFunction(latitude, longitude, term);
-  let cleanedSearchResult = extractRelevantData(searchResult, numberToAdd);
-  return cleanedSearchResult;
+  return data;
 }
 
-function assignWeight(termName, termWeight, businessList) {
-  let businessID = business;
-  let distance = 0;
-  let distanceWeight = 0;
-
-  businessList.forEach(business => {
-    distance = businessList.distance;
-    distanceWeight = (distance - 32186) / -3218.6;
-    businessList["weight"] = distance * 0.8 + termWeight * 0.2;
+function sortListByWeights(data) {
+  data.business.forEach((business, index) => {
+    business.data.businesses.sort((a, b) =>
+      a["weight"] > b["weight"]
+        ? 1
+        : a["weight"] === b["weight"]
+        ? a["distance"] > b["distance"]
+          ? 1
+          : -1
+        : -1
+    );
   });
 }
 
-function algorithm(preferences, latitude, longitude) {
-  let businessList = {};
+async function runAPI(term, latitude, longitude, limit) {
+  let searchResult = await computeFunction(term, latitude, longitude);
+  let cleanedSearchResult = extractRelevantData(searchResult, limit);
 
-  let termNames = Object.keys(preferences);
+  return cleanedSearchResult;
+}
 
-  // Query roughly 500 business search based on individual preferences and assign weights
-  let remainingBusinesses = 500;
-  let tempWeight = preferences[termNames[0]];
+function assignWeights(termName, termWeight, data) {
+  data.data.businesses.forEach(business => {
+    business["weight"] =
+      ((business.distance - 32186) / -3218.6) * 0.8 + termWeight * 0.2;
+  });
 
-  let BreakException = {};
+  return data;
+}
 
-  try {
-    termNames.forEach(termName => {
-      if (remainingBusinesses > 0) {
+exports.algorithm = async (req, res) => {
+    let preferences = req.body.preferences;
+    let latitude = req.body.latitude;
+    let longitude = req.body.longitude;
+  let businesses = {
+      business: []
+    },
+    BreakException = {},
+    termNames = Object.keys(preferences),
+    remainingBusinesses = 500; // Query roughly 500 business search based on individual preferences and assign weights
+
+  await termNames.reduce((promiseChain, termName) => {
+    return promiseChain.then(async () => {
+      if (remainingBusinesses < 0) {
         throw BreakException;
       }
 
-      tempWeight = preferences[termName];
+      let tempWeight = preferences[termName];
       remainingBusinesses -= Math.floor(preferences[termName]) * 4;
-      businessList[termName] = assignWeights(
+
+      let data = await runAPI(
         termName,
-        tempWeight,
-        runAPI(latitude, longitude, floor(tempWeight) * 4, termName)
+        latitude,
+        longitude,
+        Math.floor(tempWeight) * 4
       );
+
+      let weights = assignWeights(termName, tempWeight, data);
+
+      businesses.business.push(weights);
     });
-  } catch (e) {
-    if (e !== BreakException) throw e;
-  }
+  }, Promise.resolve([]));
 
-  sortListByWeights(businessList);
-  return businessList;
+  sortListByWeights(businesses);
+  res.status(200).send(businesses);
 }
-
-console.log(
-  algorithm(
-    {
-      active: 0,
-      restaurants: 2,
-      food: 5,
-      arts: 6
-    },
-    34.079994,
-    -118.25519
-  )
-);
